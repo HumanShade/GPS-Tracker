@@ -77,3 +77,14 @@ dependencies.lock
 *.elf
 *.bin
 *.map
+
+# Local toolchain / vendored deps (not part of this repo's history)
+external/
+.venv/
+eim_config.toml
+
+# Find My key material — PRIVATE KEYS, never commit
+output/
+*_keyfile
+*_devices.json
+*.keys
