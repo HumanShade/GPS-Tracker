@@ -20,10 +20,12 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 - [x] Commit the untracked `docs/arduino-nano-esp32-user-manual.md`
 
 ### Part B — Phase 0: ESP-IDF setup + hello-world (`phase-0-setup`)
-- [~] Scaffold `firmware/hello-world/` (boot banner + chip info + heartbeat, USB-Serial/JTAG console)
-- [~] Host-side Unity **logic** unit-test pipeline (`linux` target)
-- [ ] Document ESP-IDF install on Windows (target esp32s3) in firmware README
-- [!] Owner installs ESP-IDF + flashes board: `idf.py -p COMx flash monitor` shows banner (physical, owner-run)
+- [x] Scaffold `firmware/hello-world/` (boot banner + chip info + heartbeat, USB-Serial/JTAG console)
+- [x] Host-side Unity **logic** unit-test pipeline (`linux` target) — banner logic + expected
+      strings independently verified with host gcc (5 cases incl. truncation)
+- [x] Document ESP-IDF install on Windows (target esp32s3) in `firmware/hello-world/README.md`
+- [!] **Owner action:** install ESP-IDF, then `idf.py set-target esp32s3 && idf.py -p COMx flash monitor`
+      to confirm banner+heartbeat; and run host tests via `host_test/` (`idf.py --preview set-target linux`)
 
 ### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`) — start only
 - [ ] Fetch latest Macless-Haystack upstream
@@ -50,3 +52,7 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 - [ ] Exact LilyGO SKU + band variant (GPS-included, Standard edition) → before ordering
 - [ ] ESP32-S3 firmware portability for Macless-Haystack → verify in Phase 1a
 - [ ] Confirm Phase 2 toolchain (ESP-IDF `esp_modem` vs Arduino+TinyGSM) → at board purchase
+
+---
+
+_Last updated: 2026-06-26 — Phase 0 firmware scaffolded; awaiting owner hardware verification._
