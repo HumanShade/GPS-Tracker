@@ -9,21 +9,21 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 
 ## Active session: Phase 0 setup → Phase 1a start
 
-### Part A — Document the real board (docs housekeeping, `main`)
-- [~] Name the **Arduino Nano ESP32 (ABX00083)** in place of generic "ESP32-S3 dev board"
-  - [ ] `README.md` (hardware owned + repo-layout tree)
-  - [ ] `architecture.md` (build/coexistence note)
-  - [ ] `CLAUDE.md` (where-things-live + ESP-IDF project-wide toolchain note)
-  - [ ] `docs/shopping-list.md` (already-owned line)
-  - [ ] `docs/build-roadmap.md` (Phase 0/1 board + toolchain columns → ESP-IDF)
-  - [ ] `docs/component-ble-crowdsourced.md` (board name + esp32s3 target + py-pin caveat)
-- [ ] Commit the untracked `docs/arduino-nano-esp32-user-manual.md`
+### Part A — Document the real board (docs housekeeping, `main`) — DONE (commit 218e23d)
+- [x] Name the **Arduino Nano ESP32 (ABX00083)** in place of generic "ESP32-S3 dev board"
+  - [x] `README.md` (hardware owned + repo-layout tree)
+  - [x] `architecture.md` (build/coexistence note)
+  - [x] `CLAUDE.md` (where-things-live + ESP-IDF project-wide toolchain note)
+  - [x] `docs/shopping-list.md` (already-owned line)
+  - [x] `docs/build-roadmap.md` (Phase 0/1 board + toolchain columns → ESP-IDF)
+  - [x] `docs/component-ble-crowdsourced.md` (board name + esp32s3 target + py-pin caveat)
+- [x] Commit the untracked `docs/arduino-nano-esp32-user-manual.md`
 
 ### Part B — Phase 0: ESP-IDF setup + hello-world (`phase-0-setup`)
-- [ ] Install + document ESP-IDF on Windows (target esp32s3)
-- [ ] Scaffold `firmware/hello-world/` (boot banner + chip info + heartbeat, USB-Serial/JTAG console)
-- [ ] Host-side Unity **logic** unit-test pipeline (`linux` target)
-- [!] Owner flashes board: `idf.py -p COMx flash monitor` shows banner (physical, owner-run)
+- [~] Scaffold `firmware/hello-world/` (boot banner + chip info + heartbeat, USB-Serial/JTAG console)
+- [~] Host-side Unity **logic** unit-test pipeline (`linux` target)
+- [ ] Document ESP-IDF install on Windows (target esp32s3) in firmware README
+- [!] Owner installs ESP-IDF + flashes board: `idf.py -p COMx flash monitor` shows banner (physical, owner-run)
 
 ### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`) — start only
 - [ ] Fetch latest Macless-Haystack upstream

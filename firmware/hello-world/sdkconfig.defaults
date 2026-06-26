@@ -1,0 +1,5 @@
+# Defaults applied on first `idf.py set-target esp32s3`.
+# The Arduino Nano ESP32 exposes its console over the ESP32-S3 native USB
+# (USB-Serial/JTAG peripheral), so route stdio there — no extra UART wiring,
+# and `idf.py monitor` works over the same USB cable used to flash.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
