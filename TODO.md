@@ -7,9 +7,12 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 
 ---
 
-## Active session: Phase 0 setup → Phase 1a start
+## Phase 0 → Phase 1a
 
-### Part A — Document the real board (docs housekeeping, `main`) — DONE (commit 218e23d)
+Toolchain is now installed (ESP-IDF v6.0.1) and the firmware **builds for esp32s3 for real**;
+`main` + `phase-0-setup` are pushed to origin. Remaining Phase 1a work is owner hardware + viewer.
+
+### Part A — Document the real board (docs housekeeping, `main`) — DONE (commit 218e23d, pushed)
 - [x] Name the **Arduino Nano ESP32 (ABX00083)** in place of generic "ESP32-S3 dev board"
   - [x] `README.md` (hardware owned + repo-layout tree)
   - [x] `architecture.md` (build/coexistence note)
@@ -19,23 +22,22 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
   - [x] `docs/component-ble-crowdsourced.md` (board name + esp32s3 target + py-pin caveat)
 - [x] Commit the untracked `docs/arduino-nano-esp32-user-manual.md`
 
-### Part B — Phase 0: ESP-IDF setup + hello-world (`phase-0-setup`)
+### Part B — Phase 0: ESP-IDF setup + hello-world (`phase-0-setup`, pushed)
 - [x] Scaffold `firmware/hello-world/` (boot banner + chip info + heartbeat, USB-Serial/JTAG console)
-- [x] Host-side Unity **logic** unit-test pipeline (`linux` target) — banner logic + expected
-      strings independently verified with host gcc (5 cases incl. truncation)
-- [x] Document ESP-IDF install on Windows (target esp32s3) in `firmware/hello-world/README.md`
-- [!] **Owner action:** install ESP-IDF, then `idf.py set-target esp32s3 && idf.py -p COMx flash monitor`
-      to confirm banner+heartbeat; and run host tests via `host_test/` (`idf.py --preview set-target linux`)
+- [x] **Builds clean for esp32s3 on IDF v6.0.1** (verified, 85% app partition free)
+- [x] Document ESP-IDF install on Windows in `firmware/hello-world/README.md`
+- [!] **Owner action:** `idf.py -p COMx flash monitor` to confirm banner+heartbeat on hardware
 
-### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`) — start only
-- [x] `apple_find_my` encoder component: key → BLE static addr + 31-byte adv payload
-      (byte layout confirmed against current OpenHaystack/Macless-Haystack upstream)
-- [x] Host-side Unity tests for Apple BLE adv payload construction
-      (full layout + addr `|0xC0` masking + `key[0]>>6` high-bits; verified with host gcc)
-- [x] Phase 1a runbook in `firmware/ble-beacon/README.md`
-- [!] **Owner action:** clone Macless-Haystack, make a pinned 3.11/3.12 venv, generate keys
-- [!] **Owner action:** port/build ESP32 firmware for esp32s3 (verify S3 portability), inject key, flash
-- [!] **Owner action:** stand up viewer + anisette (Docker + Apple ID); confirm map pin
+### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`, not pushed yet)
+- [x] `apple_find_my` encoder component (byte layout confirmed vs current upstream)
+- [x] **Portable** host test harness `firmware/test/` (CMake + vendored Unity; runs natively —
+      the IDF `linux` target does NOT build on Windows). banner + apple_find_my pass via ctest.
+- [x] Beacon firmware `firmware/ble-beacon/` **builds for esp32s3 on IDF v6** (port resolved:
+      16MB flash, BLE 4.2 legacy adv, classic-BT release guarded out)
+- [x] Keys generated (`output/tracker01_keyfile` etc.) via `generate_keys.py` in `.venv`
+- [x] Runbook updated in `firmware/ble-beacon/README.md`
+- [!] **Owner action:** `idf.py -p COMx flash` + flash `tracker01_keyfile` at `0x110000`
+- [!] **Owner action:** stand up endpoint + anisette (Docker + Apple ID), import devices.json, confirm map pin
 
 ---
 
@@ -53,9 +55,9 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 ## Open decisions to resolve in-phase
 - [ ] SIM/eSIM provider + plan (data + outbound SMS + regional bands) → Phase 2
 - [ ] Exact LilyGO SKU + band variant (GPS-included, Standard edition) → before ordering
-- [ ] ESP32-S3 firmware portability for Macless-Haystack → verify in Phase 1a
+- [x] ESP32-S3 firmware portability for Macless-Haystack → **RESOLVED**: builds for esp32s3/IDF v6
 - [ ] Confirm Phase 2 toolchain (ESP-IDF `esp_modem` vs Arduino+TinyGSM) → at board purchase
 
 ---
 
-_Last updated: 2026-06-26 — Phase 0 scaffolded; Phase 1a Apple encoder + tests done; awaiting owner hardware + Macless-Haystack integration._
+_Last updated: 2026-06-26 — Phase 0 + Phase 1a firmware build clean for esp32s3 on IDF v6; host tests pass; keys generated. Remaining: owner flashes + stands up the Apple viewer._
