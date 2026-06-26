@@ -43,7 +43,7 @@
 /* After a power-on / normal reset, keep advertising (so the USB-Serial/JTAG stays up and the
  * board is reachable for re-flash and `idf.py monitor`) for this many seconds before entering
  * the deep-sleep cycle. The USB port is unavailable during deep sleep. 0 = sleep immediately. */
-#define BEACON_WAKE_WINDOW_S 30
+#define BEACON_WAKE_WINDOW_S 5
 /* If 1, never deep-sleep: advertise continuously. Best for the bench and Apple-network
  * bring-up (more chances to be heard, and USB is always reachable). Set 0 for the low-power
  * production beacon. */
@@ -176,7 +176,8 @@ void app_main(void)
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     ESP_ERROR_CHECK(esp_ble_gap_register_callback(esp_gap_cb));
 
-    bool first_boot = (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED);
+    /* Bitmask is 0 when not woken from deep sleep (i.e. a fresh power-on / normal reset). */
+    bool first_boot = (esp_sleep_get_wakeup_causes() == 0);
     if (first_boot)
     {
         key_count = get_key_count();
