@@ -4,7 +4,8 @@ Prices are rough and region-dependent — **verify current price, stock, and reg
 variant before ordering.** Items are grouped by phase so you can buy as you go.
 
 ## Already owned
-- **ESP32-S3 dev board** — used for Phase 1 (BLE). No purchase needed.
+- **Arduino Nano ESP32** (ABX00083) — ESP32-S3 in a u-blox NORA-W106-10B module. Used for
+  Phase 1 (BLE). No purchase needed. See [`arduino-nano-esp32-user-manual.md`](arduino-nano-esp32-user-manual.md).
 
 ---
 

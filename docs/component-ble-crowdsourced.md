@@ -4,7 +4,9 @@
 and **Google Find My Device**, so a parked bike in a public space gets passively located by
 strangers' phones — no SIM, no subscription, near-zero power.
 
-**Board:** the standalone ESP32-S3 I already have.
+**Board:** the **Arduino Nano ESP32** (ABX00083, ESP32-S3 / u-blox NORA-W106-10B) I already
+have — see [`arduino-nano-esp32-user-manual.md`](arduino-nano-esp32-user-manual.md).
+**Toolchain:** ESP-IDF, target `esp32s3`.
 **Cost:** none (uses owned hardware + free Apple/Google accounts).
 
 ---
@@ -17,8 +19,12 @@ strangers' phones — no SIM, no subscription, near-zero power.
 - **Apple is the more mature path** (precomputes weeks of rolling keys, no re-registration) →
   do Apple first so there's a working result early.
 - ⚠️ **ESP32-S3 portability:** the original OpenHaystack/Macless-Haystack firmware targeted the
-  classic ESP32. The S3 has BLE 5.0 and should work, but **verify/port** — this is a known risk.
-  GoogleFindMyTools uses ESP-IDF (works across ESP32 variants) but check S3 support.
+  classic ESP32. The S3 has BLE 5.0 and should work, but **verify/port** (set-target `esp32s3`)
+  — this is a known risk. GoogleFindMyTools uses ESP-IDF (works across ESP32 variants) but check
+  S3 support.
+- ⚠️ **Host Python version:** system Python is 3.14 (too new for some Find My host tooling, e.g.
+  Macless-Haystack key generation and the anisette/viewer stack). Run host scripts in a **pinned
+  3.11/3.12 venv**, not system Python.
 
 ---
 

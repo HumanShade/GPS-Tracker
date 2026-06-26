@@ -17,7 +17,9 @@ These two layers are built in **separate phases** and can coexist later on one d
 
 ## Hardware I already have
 
-- **ESP32-S3 dev board** (standalone) — used for **Phase 1**.
+- **Arduino Nano ESP32** (ABX00083) — used for **Phase 1**. An ESP32-S3 inside a u-blox
+  **NORA-W106-10B** module: native USB, built-in antenna, 8 MB PSRAM, VIN 6–21 V. See
+  [`docs/arduino-nano-esp32-user-manual.md`](docs/arduino-nano-esp32-user-manual.md).
 
 ## Hardware to buy
 
@@ -67,7 +69,7 @@ See [`docs/component-power.md`](docs/component-power.md).
 
 | Decision | Choice | Why |
 |---|---|---|
-| MCU | ESP32-S3 | Already owned; BLE 5.0; same toolchain across both phases |
+| MCU | ESP32-S3 (Arduino Nano ESP32, owned) | Already owned; BLE 5.0; same toolchain across both phases |
 | Build order | BLE first, then cellular | BLE needs no SIM/hardware purchase; reuse owned board |
 | Cellular tech | **LTE Cat-1** (SIM7670G) | Broad coverage, no LTE-M/NB-IoT region check needed |
 | Cellular board | LilyGO **T-SIM7670G-S3** | All-in-one ESP32-S3 + Cat-1 + GNSS + LiPo mgmt + eSIM pad |
@@ -91,8 +93,11 @@ See [`docs/component-power.md`](docs/component-power.md).
 motorcycle-tracker/
 ├── README.md                         # this file — top-level plan + index
 ├── architecture.md                   # system architecture, layers, data flows
+├── TODO.md                            # living progress tracker
+├── firmware/                          # ESP-IDF firmware (added as phases are built)
 └── docs/
     ├── build-roadmap.md             # phase/branch dispatch guide for sessions
+    ├── arduino-nano-esp32-user-manual.md # datasheet for the owned Phase 1 board
     ├── shopping-list.md              # what to buy, with reasoning
     ├── component-ble-crowdsourced.md # Phase 1: Apple + Google BLE beacons
     ├── component-cellular-gps.md     # Phase 2: T-SIM7670G-S3, GPS, modem

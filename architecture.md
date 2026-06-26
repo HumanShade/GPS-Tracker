@@ -91,7 +91,7 @@ nothing to report until it moves.
 
 ## Build/coexistence notes
 
-- **Phase 1** runs on the **standalone ESP32-S3 I already own** (BLE only).
+- **Phase 1** runs on the **Arduino Nano ESP32** (ABX00083, ESP32-S3) I already own (BLE only).
 - **Phase 2** runs on the **LilyGO T-SIM7670G-S3** (ESP32-S3 + modem + GPS + LiPo mgmt).
 - **Phase 5 (optional)** merges Layer 1's advertising loop onto the Phase 2 board so both run together.
 - BLE advertising and the cellular modem do not contend: BLE is the SoC radio; the modem is a

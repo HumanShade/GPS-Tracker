@@ -19,6 +19,9 @@ The repo is currently **planning docs**; firmware is built phase by phase (see b
 - `docs/build-roadmap.md` — phase → branch dispatch guide. **Read this before starting build work.**
 - `docs/component-*.md` — self-contained work packages (context, goal, tasks, acceptance).
 - `docs/shopping-list.md` — hardware to buy, with reasoning.
+- `docs/arduino-nano-esp32-user-manual.md` — datasheet for the owned Phase 1 board
+  (Arduino Nano ESP32, ABX00083; ESP32-S3 in a u-blox NORA-W106-10B module).
+- `TODO.md` — living progress tracker for the build.
 
 When adding firmware, keep it out of the doc roots: use a top-level `firmware/` (or
 per-board subdirs) rather than scattering source next to the planning docs.
@@ -33,11 +36,14 @@ per-board subdirs) rather than scattering source next to the planning docs.
 
 ## Phase / toolchain quick reference
 
+- **Toolchain: ESP-IDF, project-wide** (target `esp32s3`) — chosen for a professional build.
 - **Phase 0** must come first and blocks all others (flash + serial-monitor hello-world).
-- **Phase 1 (BLE)** and **Phase 2 (cellular)** are independent — different boards, different
-  toolchains — and can run in parallel on separate branches.
-- Phase 1 BLE → **ESP-IDF**, owned ESP32-S3. Phase 2 cellular → **Arduino-ESP32 + LilyGO
-  TinyGSM fork**, T-SIM7670G-S3. Phases 3/5 are downstream of the cellular board.
+- **Phase 1 (BLE)** and **Phase 2 (cellular)** are independent — different boards — and can
+  run in parallel on separate branches.
+- Phase 0 + Phase 1 BLE → **ESP-IDF** on the owned **Arduino Nano ESP32** (ESP32-S3). Phase 2
+  cellular → ESP-IDF on the T-SIM7670G-S3, modem via **`esp_modem`** (confirm at board
+  purchase; the older Arduino+TinyGSM path is dropped). Phases 3/5 are downstream of the
+  cellular board.
 - Some blockers are **procurement/human**, not code (buy the T-SIM7670G-S3 with the right
   GPS SKU/bands; pick a SIM that does data **and** outbound SMS). Surface these; don't code around them.
 
