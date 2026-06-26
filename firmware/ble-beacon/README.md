@@ -35,6 +35,14 @@ ctest --test-dir firmware/test/build --output-on-failure
 
 ## 2. Build the firmware (ESP-IDF PowerShell)
 
+> ⚠️ Use a **clean** shell for `idf.py` — do **not** have the project `.venv` active at the
+> same time. The ESP-IDF profile activates its own Python venv, whose `Activate.ps1` runs
+> `deactivate` on the prior `.venv` and restores PATH to its pre-venv state, which strips the
+> IDF tools (e.g. `ninja`) off PATH and makes `idf.py build/flash` fail with `WinError 2`.
+> VS Code's integrated terminal auto-activates `.venv`, so run `deactivate` first (or use a
+> separate non-VS-Code PowerShell / the EIM "ESP-IDF" desktop shortcut). Keep the `.venv` for
+> the key-generation step below in its own terminal.
+
 ```powershell
 idf.py set-target esp32s3
 idf.py build
