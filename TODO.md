@@ -28,11 +28,14 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
       to confirm banner+heartbeat; and run host tests via `host_test/` (`idf.py --preview set-target linux`)
 
 ### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`) — start only
-- [ ] Fetch latest Macless-Haystack upstream
-- [ ] Generate keys in pinned 3.11/3.12 venv (not system 3.14)
-- [ ] Port/build ESP32 firmware for esp32s3 (verify S3 portability)
-- [ ] Host-side Unity tests for Apple BLE adv payload construction
-- [!] Stand up viewer + anisette (needs Docker + Apple ID); confirm map pin
+- [x] `apple_find_my` encoder component: key → BLE static addr + 31-byte adv payload
+      (byte layout confirmed against current OpenHaystack/Macless-Haystack upstream)
+- [x] Host-side Unity tests for Apple BLE adv payload construction
+      (full layout + addr `|0xC0` masking + `key[0]>>6` high-bits; verified with host gcc)
+- [x] Phase 1a runbook in `firmware/ble-beacon/README.md`
+- [!] **Owner action:** clone Macless-Haystack, make a pinned 3.11/3.12 venv, generate keys
+- [!] **Owner action:** port/build ESP32 firmware for esp32s3 (verify S3 portability), inject key, flash
+- [!] **Owner action:** stand up viewer + anisette (Docker + Apple ID); confirm map pin
 
 ---
 
@@ -55,4 +58,4 @@ Status key: `[ ]` planned · `[~]` in progress · `[x]` done · `[!]` blocked (h
 
 ---
 
-_Last updated: 2026-06-26 — Phase 0 firmware scaffolded; awaiting owner hardware verification._
+_Last updated: 2026-06-26 — Phase 0 scaffolded; Phase 1a Apple encoder + tests done; awaiting owner hardware + Macless-Haystack integration._
