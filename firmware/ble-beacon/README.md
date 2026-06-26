@@ -68,15 +68,28 @@ For real fit-and-forget coverage generate a set of rolling keys (the firmware ro
 
 ## 4. Flash (owner) — board over USB
 
-From an ESP-IDF PowerShell in this directory:
+Flashing ESP-IDF replaces the Arduino bootloader, so the **double-tap-RESET** recovery no
+longer works. To (re)flash you must put the board in **firmware download mode** using the
+**B1** test pad (= GPIO0), which has a **GND** pad right next to it
+([Arduino guide](https://support.arduino.cc/hc/en-us/articles/9810414060188-Reset-the-Arduino-bootloader-on-the-Nano-ESP32)):
+
+1. Short **B1 ↔ GND**. The RGB LED turns **green** — that confirms the *correct* pads (red
+   means wrong pads / a short to 3V3).
+2. While still shorted, press and release the white **RST** button.
+3. Remove the jumper. The RGB LED stays **purple** (blue/yellow on early units) = download
+   mode. A **stable COM port** now appears (use [`../../tools/watch-com-ports.ps1`](../../tools/watch-com-ports.ps1) to find it).
+
+Then, from an ESP-IDF PowerShell (no `.venv`!) in this directory:
 
 ```powershell
-idf.py -p COM<N> flash                                  # bootloader + partition table + app
-esptool.py --chip esp32s3 -p COM<N> write_flash 0x110000 ..\..\output\tracker01_keyfile
+idf.py -p COM<N> flash                                                       # app
+python -m esptool --chip esp32s3 -p COM<N> write-flash 0x110000 ..\..\output\tracker01_keyfile
 ```
 
-(See Phase 0 README for finding `COM<N>` and the double-tap-RESET download-mode fallback.)
-Reset the board afterward; it logs over the native USB console (`idf.py -p COM<N> monitor`).
+You only need the B1 dance **once**: after the app flashes, this firmware stays awake and
+USB-reachable (see `BEACON_WAKE_WINDOW_S`, and it stays awake indefinitely while no keys are
+present), so the second command — and future re-flashes — connect on their own via the COM
+port. Press **RST** when done; monitor with `idf.py -p COM<N> monitor`.
 
 ## 5. Viewer (owner) — Docker + Apple ID
 

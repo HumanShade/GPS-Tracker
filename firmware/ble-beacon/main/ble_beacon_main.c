@@ -40,6 +40,15 @@
 /* Reuse one key for this many wake cycles before advancing (60s * 30 = ~30 min/key). */
 #define REUSE_CYCLES 30
 
+/* After a power-on / normal reset, keep advertising (so the USB-Serial/JTAG stays up and the
+ * board is reachable for re-flash and `idf.py monitor`) for this many seconds before entering
+ * the deep-sleep cycle. The USB port is unavailable during deep sleep. 0 = sleep immediately. */
+#define BEACON_WAKE_WINDOW_S 30
+/* If 1, never deep-sleep: advertise continuously. Best for the bench and Apple-network
+ * bring-up (more chances to be heard, and USB is always reachable). Set 0 for the low-power
+ * production beacon. */
+#define BEACON_NO_DEEP_SLEEP 0
+
 static const char *LOG_TAG = "macless_haystack";
 
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
@@ -129,6 +138,28 @@ RTC_DATA_ATTR uint8_t key_count;
 RTC_DATA_ATTR uint8_t key_index;
 RTC_DATA_ATTR uint8_t cycle = 0;
 
+/* Load advertisement key @p index from the "key" partition and (re)start advertising it. */
+static void advertise_key(uint8_t index)
+{
+    int address = 1 + (index * sizeof(public_key));
+    if (load_bytes_from_partition(public_key, sizeof(public_key), address) != ESP_OK)
+    {
+        ESP_LOGE(LOG_TAG, "Could not read key index %d", index);
+        return;
+    }
+    ESP_LOGI(LOG_TAG, "key index %d (start %02x %02x)", index, public_key[0], public_key[1]);
+
+    apple_find_my_set_address(rnd_addr, public_key);
+    apple_find_my_build_adv(adv_data, public_key);
+    ESP_LOGI(LOG_TAG, "device address: %02x %02x %02x %02x %02x %02x",
+             rnd_addr[0], rnd_addr[1], rnd_addr[2], rnd_addr[3], rnd_addr[4], rnd_addr[5]);
+
+    esp_ble_gap_stop_advertising(); /* harmless before the first start; needed between keys */
+    ESP_ERROR_CHECK(esp_ble_gap_set_rand_addr(rnd_addr));
+    /* advertising (re)starts in esp_gap_cb on ADV_DATA_RAW_SET_COMPLETE */
+    ESP_ERROR_CHECK(esp_ble_gap_config_adv_data_raw((uint8_t *)&adv_data, sizeof(adv_data)));
+}
+
 void app_main(void)
 {
     ESP_ERROR_CHECK(nvs_flash_init());
@@ -143,73 +174,68 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_bluedroid_init_with_cfg(&bluedroid_cfg));
     ESP_ERROR_CHECK(esp_bluedroid_enable());
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
+    ESP_ERROR_CHECK(esp_ble_gap_register_callback(esp_gap_cb));
 
-    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED)
+    bool first_boot = (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED);
+    if (first_boot)
     {
-        /* Start at a random key index. */
         key_count = get_key_count();
-        key_index = (esp_random() % key_count);
-        ESP_LOGI(LOG_TAG, "application initialized");
+        ESP_LOGI(LOG_TAG, "application initialized (%d keys)", key_count);
     }
 
+    /* Empty/erased "key" partition reads 0 or 0xFF. Rather than advertise garbage and deep-sleep
+     * (which drops USB and makes the board hard to reach), stay awake so a keyfile can be flashed
+     * at 0x110000 over USB, then reset. */
+    if (key_count == 0 || key_count == 0xFF)
+    {
+        ESP_LOGE(LOG_TAG, "No keys in 'key' partition. Flash a keyfile at 0x110000 and reset. "
+                          "Staying awake (USB reachable).");
+        while (true) { vTaskDelay(pdMS_TO_TICKS(1000)); }
+    }
+
+    if (first_boot)
+    {
+        key_index = (esp_random() % key_count);
+    }
+
+    advertise_key(key_index);
+
+#if BEACON_NO_DEEP_SLEEP
+    ESP_LOGI(LOG_TAG, "continuous advertising (no deep sleep)");
     while (true)
     {
-        esp_err_t status;
-        int address = 1 + (key_index * sizeof(public_key));
-        ESP_LOGI(LOG_TAG, "Loading key with index %d at address %d", key_index, address);
-        if (load_bytes_from_partition(public_key, sizeof(public_key), address) != ESP_OK)
-        {
-            ESP_LOGE(LOG_TAG, "Could not read the key, stopping.");
-            return;
-        }
-        ESP_LOGI(LOG_TAG, "using key with start %02x %02x", public_key[0], public_key[1]);
-
-        apple_find_my_set_address(rnd_addr, public_key);
-        apple_find_my_build_adv(adv_data, public_key);
-
-        ESP_LOGI(LOG_TAG, "using device address: %02x %02x %02x %02x %02x %02x",
-                 rnd_addr[0], rnd_addr[1], rnd_addr[2], rnd_addr[3], rnd_addr[4], rnd_addr[5]);
-
-        if ((status = esp_ble_gap_register_callback(esp_gap_cb)) != ESP_OK)
-        {
-            ESP_LOGE(LOG_TAG, "gap register error: %s", esp_err_to_name(status));
-            return;
-        }
-        if ((status = esp_ble_gap_set_rand_addr(rnd_addr)) != ESP_OK)
-        {
-            ESP_LOGE(LOG_TAG, "couldn't set random address: %s", esp_err_to_name(status));
-            return;
-        }
-        if ((status = esp_ble_gap_config_adv_data_raw((uint8_t *)&adv_data, sizeof(adv_data))) != ESP_OK)
-        {
-            ESP_LOGE(LOG_TAG, "couldn't configure BLE adv: %s", esp_err_to_name(status));
-            return;
-        }
-        ESP_LOGI(LOG_TAG, "Sending beacon (with key index %d)", key_index);
-        vTaskDelay(10);
-        esp_ble_gap_stop_advertising();
-
-        if (cycle >= REUSE_CYCLES)
-        {
-            ESP_LOGI(LOG_TAG, "Max cycles %d reached. Changing key.", cycle);
-            key_index = (key_index + 1) % key_count;
-            cycle = 0;
-        }
-        else
-        {
-            ESP_LOGI(LOG_TAG, "Current cycle is %d. Reusing key.", cycle);
-            cycle++;
-        }
-
-        ESP_ERROR_CHECK(esp_bluedroid_disable());
-        ESP_ERROR_CHECK(esp_bluedroid_deinit());
-        ESP_ERROR_CHECK(esp_bt_controller_disable());
-        ESP_ERROR_CHECK(esp_bt_controller_deinit());
-
-        vTaskDelay(10);
-        ESP_LOGI(LOG_TAG, "Going to sleep");
-        vTaskDelay(10);
-        esp_sleep_enable_timer_wakeup(DELAY_IN_S * 1000000ULL);
-        esp_deep_sleep_start();
+        vTaskDelay(pdMS_TO_TICKS(DELAY_IN_S * 1000));
+        key_index = (key_index + 1) % key_count;
+        advertise_key(key_index);
     }
+#else
+    /* Stay awake (USB reachable for re-flash/monitor) on a fresh power-on; just a short burst
+     * on subsequent timer wake-ups. */
+    int awake_ms = (first_boot && BEACON_WAKE_WINDOW_S > 0) ? (BEACON_WAKE_WINDOW_S * 1000) : 100;
+    if (awake_ms > 100)
+    {
+        ESP_LOGI(LOG_TAG, "advertising; USB reachable for ~%ds before deep sleep", BEACON_WAKE_WINDOW_S);
+    }
+    vTaskDelay(pdMS_TO_TICKS(awake_ms));
+    esp_ble_gap_stop_advertising();
+
+    if (cycle >= REUSE_CYCLES)
+    {
+        key_index = (key_index + 1) % key_count;
+        cycle = 0;
+    }
+    else
+    {
+        cycle++;
+    }
+
+    ESP_ERROR_CHECK(esp_bluedroid_disable());
+    ESP_ERROR_CHECK(esp_bluedroid_deinit());
+    ESP_ERROR_CHECK(esp_bt_controller_disable());
+    ESP_ERROR_CHECK(esp_bt_controller_deinit());
+
+    ESP_LOGI(LOG_TAG, "deep sleep for %ds", DELAY_IN_S);
+    esp_sleep_enable_timer_wakeup(DELAY_IN_S * 1000000ULL);
+    esp_deep_sleep_start();
+#endif
 }
