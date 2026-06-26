@@ -18,10 +18,14 @@ have — see [`arduino-nano-esp32-user-manual.md`](arduino-nano-esp32-user-manua
 - Two separate networks = two packet formats. Build them **one at a time**, then combine.
 - **Apple is the more mature path** (precomputes weeks of rolling keys, no re-registration) →
   do Apple first so there's a working result early.
-- ⚠️ **ESP32-S3 portability:** the original OpenHaystack/Macless-Haystack firmware targeted the
-  classic ESP32. The S3 has BLE 5.0 and should work, but **verify/port** (set-target `esp32s3`)
-  — this is a known risk. GoogleFindMyTools uses ESP-IDF (works across ESP32 variants) but check
-  S3 support.
+- ✅ **ESP32-S3 portability — RESOLVED for Apple (Phase 1a).** The Macless-Haystack ESP32
+  firmware was ported to `firmware/ble-beacon/` and **builds for `esp32s3` on ESP-IDF v6.0.1**.
+  Three changes were needed: (1) set 16 MB flash (`CONFIG_ESPTOOLPY_FLASHSIZE_16MB`) so the
+  `key` partition at `0x110000` fits; (2) enable BLE 4.2 legacy advertising
+  (`CONFIG_BT_BLE_42_FEATURES_SUPPORTED`) — off by default on BLE-5.0 chips, but this firmware
+  uses the legacy `esp_ble_gap_*_advertising` APIs; (3) guard out the classic-BT memory release
+  (`#if CONFIG_IDF_TARGET_ESP32`), since the S3 is BLE-only. On-hardware advertising is still
+  owner-verified. GoogleFindMyTools (Phase 1b) S3 support remains to be checked.
 - ⚠️ **Host Python version:** system Python is 3.14 (too new for some Find My host tooling, e.g.
   Macless-Haystack key generation and the anisette/viewer stack). Run host scripts in a **pinned
   3.11/3.12 venv**, not system Python.
