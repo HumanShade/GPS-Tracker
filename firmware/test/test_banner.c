@@ -1,6 +1,5 @@
-// Host-side logic unit tests for the banner component, run on the IDF "linux"
-// target with the bundled Unity. No hardware in the loop -- this is the
-// pure-logic test pipeline the later phases (BLE payload/key logic) plug into.
+// Host logic unit tests for the banner component (Phase 0).
+// Portable: builds with any host C compiler via firmware/test/CMakeLists.txt.
 
 #include <string.h>
 
@@ -51,7 +50,7 @@ static void test_uptime_truncation_reports_full_length(void)
     TEST_ASSERT_EQUAL_INT(0, buf[7]);      // still NUL-terminated within buf
 }
 
-void app_main(void)
+int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_uptime_zero);
@@ -59,5 +58,5 @@ void app_main(void)
     RUN_TEST(test_uptime_hms_rollover);
     RUN_TEST(test_uptime_days);
     RUN_TEST(test_uptime_truncation_reports_full_length);
-    UNITY_END();
+    return UNITY_END();
 }

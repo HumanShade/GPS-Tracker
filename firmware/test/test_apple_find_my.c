@@ -1,5 +1,5 @@
-// Host-side logic unit tests for the Apple Find My advertisement encoder.
-// Run on the IDF "linux" target with the bundled Unity -- no hardware.
+// Host logic unit tests for the Apple Find My advertisement encoder (Phase 1a).
+// Portable: builds with any host C compiler via firmware/test/CMakeLists.txt.
 //
 // Byte layout asserted here matches OpenHaystack / Macless-Haystack firmware
 // (set_addr_from_key / set_payload_from_key).
@@ -95,7 +95,7 @@ static void test_adv_header_is_constant(void)
     TEST_ASSERT_EQUAL_HEX8(0x00, adv[30]);  // hint always 0
 }
 
-void app_main(void)
+int main(void)
 {
     UNITY_BEGIN();
     RUN_TEST(test_address_from_ramp_key);
@@ -103,5 +103,5 @@ void app_main(void)
     RUN_TEST(test_adv_full_layout_for_ramp_key);
     RUN_TEST(test_adv_high_bits_byte);
     RUN_TEST(test_adv_header_is_constant);
-    UNITY_END();
+    return UNITY_END();
 }

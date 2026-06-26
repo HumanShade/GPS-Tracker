@@ -14,13 +14,12 @@ device holding no SIM.
 - **`components/apple_find_my/`** — the Find My advertisement encoder: advertisement key →
   6-byte BLE static address + 31-byte advertisement payload. Byte layout matches
   OpenHaystack / Macless-Haystack (`set_addr_from_key` / `set_payload_from_key`).
-- **`host_test/`** — Linux-target Unity tests asserting the exact address and payload bytes
-  (incl. the `key[0] | 0xC0` address masking and `key[0] >> 6` high-bits byte). Run with:
+- **Host tests** ([`../test`](../test)) — Unity tests asserting the exact address and payload
+  bytes (incl. the `key[0] | 0xC0` address masking and `key[0] >> 6` high-bits byte). Run with:
   ```powershell
-  cd host_test
-  idf.py --preview set-target linux
-  idf.py build
-  .\build\ble_beacon_host_test.elf
+  cmake -S firmware/test -B firmware/test/build -G "MinGW Makefiles"
+  cmake --build firmware/test/build
+  ctest --test-dir firmware/test/build --output-on-failure
   ```
 
 This isolates the most error-prone, deterministic piece (the wire format) behind unit

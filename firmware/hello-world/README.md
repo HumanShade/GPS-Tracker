@@ -82,18 +82,17 @@ I (xxx) tracker: alive - uptime 0d 00:00:02.0xx
 
 ## 3. Run the host unit tests (no hardware)
 
-The pure logic in `components/banner` is tested on the host via the IDF **linux** target.
-From the `host_test/` directory:
+The pure logic in `components/banner` is tested on the host (no board, no ESP-IDF "linux"
+target — that doesn't build on native Windows). Tests live in [`../test`](../test) and build
+with CMake + a host C compiler:
 
 ```powershell
-cd host_test
-idf.py --preview set-target linux
-idf.py build
-.\build\hello_world_host_test.elf        # runs Unity; exits non-zero on failure
+cmake -S firmware/test -B firmware/test/build -G "MinGW Makefiles"
+cmake --build firmware/test/build
+ctest --test-dir firmware/test/build --output-on-failure
 ```
 
-(On Linux/macOS the binary is `./build/hello_world_host_test`.) A passing run ends with
-`OK` and `N Tests 0 Failures 0 Ignored`.
+(Use any generator your host supports; `MinGW Makefiles` matches the bundled msys2 gcc.)
 
 > Scope: **logic unit tests only** for now. Hardware-in-the-loop / on-target testing is a
 > separate, later phase.
