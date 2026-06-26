@@ -324,6 +324,25 @@ Supports logging, graphing, and analyzing sensor data, triggering events, and au
 
 If a sketch locks up the processor and the board is unreachable via USB, **double-tap the reset button** right after power-up to enter bootloader mode.
 
+> This double-tap recovery is provided by the **Arduino bootloader**. If you flash a different
+> bootloader (e.g. an ESP-IDF build, as in this project's `firmware/`), double-tap no longer
+> works — use the **B1 download-mode** procedure below instead.
+
+#### Firmware download mode via B1 (GPIO0)
+
+The **B1** test pad connects to the ESP32-S3's **GPIO0** strapping pin, with a **GND** pad right
+next to it. Pulling GPIO0 low during reset forces the ROM **firmware download mode**, used by
+`esptool` / `idf.py flash` (and by Arduino's "Burn Bootloader" to restore the Arduino bootloader).
+
+1. Short **B1 ↔ GND**. The RGB LED turns **green** — this confirms you're on the correct pads
+   (a **red** LED means the wrong pads, e.g. a short to 3V3).
+2. While still shorted, press and release the white **RST** button.
+3. Remove the jumper. The RGB LED stays **purple** (blue/yellow on early board revisions) — the
+   board is now in download mode and enumerates a **stable** USB serial COM port.
+
+> ⚠️ Use the **B1** pad, *not* the `BOOT0` entry on the JP1 analog header — they are not the
+> same net. Source: [Arduino — Reset the bootloader on the Nano ESP32](https://support.arduino.cc/hc/en-us/articles/9810414060188-Reset-the-Arduino-bootloader-on-the-Nano-ESP32).
+
 ---
 
 ## Application Examples
