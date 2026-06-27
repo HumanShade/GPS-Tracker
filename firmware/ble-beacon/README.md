@@ -93,9 +93,10 @@ port. Press **RST** when done; monitor with `idf.py -p COM<N> monitor`.
 
 ## 5. Viewer (owner) — Docker + Apple ID
 
-Bring up the Macless-Haystack endpoint + **anisette** server from
-`external/macless-haystack/endpoint` (Docker), log in with an **Apple ID**, import
-`tracker01_devices.json`, and confirm a map pin once the parked board has been near iPhones.
+Bring up the Macless-Haystack endpoint + **anisette** server (Docker), log in with an
+**Apple ID**, import `tracker01_devices.json`, and confirm a map pin once the parked board has
+been near iPhones. Full step-by-step (and the **Apple account trust-score gate** that commonly
+blocks first-time login): [`../../docs/findmy-endpoint-setup.md`](../../docs/findmy-endpoint-setup.md).
 
 ---
 

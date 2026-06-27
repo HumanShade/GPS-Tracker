@@ -28,16 +28,23 @@ Toolchain is now installed (ESP-IDF v6.0.1) and the firmware **builds for esp32s
 - [x] Document ESP-IDF install on Windows in `firmware/hello-world/README.md`
 - [!] **Owner action:** `idf.py -p COMx flash monitor` to confirm banner+heartbeat on hardware
 
-### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`, not pushed yet)
+### Part C — Phase 1a: Apple Find My beacon (`phase-1-ble`, pushed)
 - [x] `apple_find_my` encoder component (byte layout confirmed vs current upstream)
 - [x] **Portable** host test harness `firmware/test/` (CMake + vendored Unity; runs natively —
       the IDF `linux` target does NOT build on Windows). banner + apple_find_my pass via ctest.
 - [x] Beacon firmware `firmware/ble-beacon/` **builds for esp32s3 on IDF v6** (port resolved:
       16MB flash, BLE 4.2 legacy adv, classic-BT release guarded out)
-- [x] Keys generated (`output/tracker01_keyfile` etc.) via `generate_keys.py` in `.venv`
-- [x] Runbook updated in `firmware/ble-beacon/README.md`
-- [!] **Owner action:** `idf.py -p COMx flash` + flash `tracker01_keyfile` at `0x110000`
-- [!] **Owner action:** stand up endpoint + anisette (Docker + Apple ID), import devices.json, confirm map pin
+- [x] Post-reset wake window + stay-awake-when-unkeyed (re-flash without the B1 jumper);
+      optional `BEACON_NO_DEEP_SLEEP` continuous mode for bring-up
+- [x] Keys generated (`output/tracker01_keyfile` etc.) via `generate_keys.py`
+- [x] **Flashed to hardware and advertising** — `Found 1 keys`, address `0xE7..` = `key[0]|0xC0`,
+      `advertising has started` on the Nano ESP32 (via B1 download mode → `idf.py flash` + keyfile @0x110000)
+- [x] Endpoint setup documented: [`docs/findmy-endpoint-setup.md`](docs/findmy-endpoint-setup.md)
+- [!] **BLOCKED (Apple-side):** endpoint login fails on the **Apple account trust-score gate**
+      (`com.apple.mobileme status 1`). Card+address added 2026-06-27, still blocked. Next:
+      sign the Apple ID into a real Apple device, and/or wait for the score to update, then
+      `docker start -ai macless-haystack`. See the endpoint doc.
+- [ ] Import `devices.json` into the frontend and confirm a map pin (after the gate clears)
 
 ---
 
@@ -60,4 +67,4 @@ Toolchain is now installed (ESP-IDF v6.0.1) and the firmware **builds for esp32s
 
 ---
 
-_Last updated: 2026-06-26 — Phase 0 + Phase 1a firmware build clean for esp32s3 on IDF v6; host tests pass; keys generated. Remaining: owner flashes + stands up the Apple viewer._
+_Last updated: 2026-06-27 — Phase 1a beacon flashed and advertising on hardware (key + address verified). Only remaining blocker is the Apple account trust-score gate on the Macless-Haystack endpoint login._
